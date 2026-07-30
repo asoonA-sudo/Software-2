@@ -3,7 +3,7 @@
 This diagram details the object-oriented structure of the simulation framework, highlighting structural inheritance and class associations.
 
 ```mermaid
-class Diagram
+classDiagram
     class Substance {
         +str name
         +MatrixNode current_node
