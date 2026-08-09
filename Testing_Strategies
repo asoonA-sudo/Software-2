@@ -1,9 +1,12 @@
-# Testing Strategies
+### 4. File: `Testing_Strategies`
+```markdown
+# Testing Strategies Matrix
 
-This document logs the Quality Assurance (QA) methodologies, test data suites and validations implemented for the text RPG.
+A record of Quality Assurance (QA) data processing steps taken to secure the stability of the reactor network simulation.
+
 ## 1. Testing Methodologies Applied
-* ** Unit Testing:** Isolated validation verifying that the `plasma_charges` counter reduces precisely by `1` per event and shuts off functionality at `0`.
-* ** Black Box Boundary Testing:** Sending text strings and out-of-bounds numerical entries (e.g., `-5`, `99`, `"A"`) to target access gateways to verify prompt handling systems.
+* **Unit Testing:** Isolated validation verifying that the `plasma_charges` counter reduces precisely by `1` per event and shuts off functionality at `0`.
+* **Black Box Boundary Testing:** Sending text strings and out-of-bounds numerical entries (e.g., `-5`, `99`, `"A"`) to target access gateways to verify prompt handling systems.
 
 ## 2. Test Execution Ledger
 
