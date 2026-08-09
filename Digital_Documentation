@@ -1,1 +1,163 @@
+import random
+import sys
 
+
+class MatrixNode:
+    """Represents a sector within the shifting Quantum Reactor Matrix."""
+    def __init__(self, node_id: int, adjacent_ids: list):
+        self.node_id = node_id
+        self.adjacent_nodes = adjacent_ids
+        # Hazard states: 'singularity', 'radiation_leak', 'plasma_vent', or None
+        self.anomaly = None  
+
+
+class Substance:
+    """Base class for physical entities manifesting within the reactor matrix."""
+    def __init__(self, name: str, starting_node: MatrixNode):
+        self.name = name
+        self.current_node = starting_node
+
+
+class Engineer(Substance):
+    """The player character. Tracks energy plasma charges and life metrics."""
+    def __init__(self, name: str, starting_node: MatrixNode):
+        super().__init__(name, starting_node)
+        self.plasma_charges = 3
+        self.is_functional = True
+
+    def traverse(self, target_node: MatrixNode):
+        """Moves the engineer to a connected matrix sector."""
+        self.current_node = target_node
+
+
+class ReactorCore:
+    """The main game engine responsible for map topology, logic loops, and states."""
+    def __init__(self):
+        self.matrix = {}
+        self.player = None
+        self.singularity_node = None
+        self.generate_matrix_grid()
+        self.deploy_entities()
+
+    def generate_matrix_grid(self):
+        """
+        Generates a complex, non-linear 20-node interconnected web 
+        representing the geometric layout of the reactor core.
+        """
+        topology = {
+            1: [2, 5, 8], 2: [1, 3, 10], 3: [2, 4, 12], 4: [3, 5, 14], 5: [1, 4, 6],
+            6: [5, 7, 15], 7: [6, 8, 17], 8: [1, 7, 9], 9: [8, 10, 18], 10: [2, 9, 11],
+            11: [10, 12, 19], 12: [3, 11, 13], 13: [12, 14, 20], 14: [4, 13, 15],
+            15: [6, 14, 16], 16: [15, 17, 20], 17: [7, 16, 18], 18: [9, 17, 19],
+            19: [11, 18, 20], 20: [13, 16, 19]
+        }
+        for n_id, adj in topology.items():
+            self.matrix[n_id] = MatrixNode(n_id, adj)
+
+    def deploy_entities(self):
+        """Randomly scatters hazards, environmental threats, and the player."""
+        node_ids = list(self.matrix.keys())
+        random.shuffle(node_ids)
+
+        # Initialize Player
+        self.player = Engineer("Player_01", self.matrix[node_ids.pop()])
+        
+        # Deploy Singularity Anomaly
+        self.singularity_node = self.matrix[node_ids.pop()]
+        self.singularity_node.anomaly = "singularity"
+
+        # Deploy Environmental Hazards
+        radiation_node = self.matrix[node_ids.pop()]
+        radiation_node.anomaly = "radiation_leak"
+
+        plasma_node = self.matrix[node_ids.pop()]
+        plasma_node.anomaly = "plasma_vent"
+
+    def scan_environment(self):
+        """Reads sensory data slates from adjacent nodes to alert the engineer."""
+        for adj_id in self.player.current_node.adjacent_nodes:
+            neighbor = self.matrix[adj_id]
+            if neighbor.anomaly == "singularity":
+                print("[WARNING]: Audio sensors detect localized gravity distortions nearby.")
+            elif neighbor.anomaly == "radiation_leak":
+                print("[WARNING]: Geiger counter spiking. Gamma radiation detected in adjacent sector.")
+            elif neighbor.anomaly == "plasma_vent":
+                print("[WARNING]: Thermal cameras indicate volatile plasma pressure spikes nearby.")
+
+    def handle_environmental_hazard(self):
+        """Processes logic if a player enters a sector containing a hazard."""
+        current_anomaly = self.player.current_node.anomaly
+        
+        if current_anomaly == "singularity":
+            print("\n[CRITICAL]: You stepped into Sector Zero. The Singularity pulls you into atomized data.")
+            print(">> GAME OVER: Structural Integrity Total Failure.")
+            self.player.is_functional = False
+            
+        elif current_anomaly == "radiation_leak":
+            print("\n[HAZARD]: Heavy radiation poisoning! You scramble backwards blindly to escape.")
+            # Punish player by forcefully scattering them to a random safe node
+            safe_nodes = [n for n in self.matrix.values() if n.anomaly != "singularity"]
+            self.player.traverse(random.choice(safe_nodes))
+            
+        elif current_anomaly == "plasma_vent":
+            print("\n[CRITICAL]: A plasma vent combusted upon entry. Suit breach detected.")
+            print(">> GAME OVER: Vital Signs Terminated.")
+            self.player.is_functional = False
+
+    def execute_system_loop(self):
+        """The main execution thread handling turns, inputs, and state changes."""
+        print("=" * 60)
+        print("          VOID CORE: PROTOCOL 9 - QUANTUM MATRIX ENGINE          ")
+        print("=" * 60)
+        print("MISSION: Contain the shifting Singularity anomaly using your ")
+        print("         Ionized Plasma Overloader charges before energy drops.")
+        
+        while self.player.is_functional:
+            current_id = self.player.current_node.node_id
+            print(f"\n--- CURRENT SECTOR: [{current_id}] ---")
+            print(f"Connected Access Tunnels: {self.player.current_node.adjacent_nodes}")
+            print(f"Remaining Overloader Charges: {self.player.plasma_charges}")
+            
+            # Run ambient diagnostic scan
+            self.scan_environment()
+
+            action = input("\nSelect Action -> (T)raverse to Sector / (D)ischarge Overloader: ").upper().strip()
+            
+            if action == 'T':
+                try:
+                    target = int(input("Enter Destination Sector ID: "))
+                    if target in self.player.current_node.adjacent_nodes:
+                        self.player.traverse(self.matrix[target])
+                        self.handle_environmental_hazard()
+                    else:
+                        print("[ERROR]: Selected Sector ID is out of structural gateway range.")
+                except ValueError:
+                    print("[ERROR]: Invalid input matrix parameters.")
+                    
+            elif action == 'D':
+                try:
+                    target = int(input("Fire containment pulse into which Sector ID? "))
+                    if target in self.player.current_node.adjacent_nodes:
+                        self.player.plasma_charges -= 1
+                        
+                        if self.matrix[target].anomaly == "singularity":
+                            print("\n" + "*" * 50)
+                            print("SUCCESS! Containment field locked. The Singularity has stabilized!")
+                            print(">> MISSION COMPLETION STATUS: SUCCESSFUL. Protocol 9 Closed.")
+                            print("*" * 50)
+                            break
+                        else:
+                            print("[MISS]: Containment wave dissipated. No anomaly detected in that sector.")
+                            if self.player.plasma_charges <= 0:
+                                print("\n[CRITICAL]: Energy weapon fully depleted. You are left defenseless.")
+                                print(">> GAME OVER: Matrix collapsed completely.")
+                                self.player.is_functional = False
+                    else:
+                        print("[ERROR]: Cannot project containment wave through bulkheads around corners.")
+                except ValueError:
+                    print("[ERROR]: Invalid input matrix parameters.")
+
+
+if __name__ == "__main__":
+    core_system = ReactorCore()
+    core_system.execute_system_loop()
