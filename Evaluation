@@ -1,4 +1,4 @@
-Evaluation
+# Evaluation
 
 The Engineer class architecture provides a solid, object-oriented foundation for a node-based sci-fi game, effectively separating positional tracking from player mechanics. By inheriting basic spatial features from the Substance parent class—such as name and current_node—the design ensures clean code reuse while extending functionality with player-specific attributes like plasma_charges and the is_functional lifecycle flag. Furthermore, handling movement through the traverse() method allows player positional updates to be conditionally gated, successfully blocking movement when the character is incapacitated.
 
